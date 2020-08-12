@@ -22,6 +22,7 @@ pipeline {
       }
       stage("plan") {
           steps {
+              sh 'make init'
               sh 'make plan'
           }
       }

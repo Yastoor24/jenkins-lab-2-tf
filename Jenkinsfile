@@ -2,7 +2,7 @@ pipeline {
   agent {
     docker {
       image "bryandollery/terraform-packer-aws-alpine"
-      args "-u root --entrypoint='' --rm"
+      args "-u root --entrypoint='' "
     }
   }
   environment {
@@ -18,16 +18,6 @@ pipeline {
       stage("init") {
           steps {
               sh 'make init'
-          }
-      }
-      stage("workspace") {
-          steps {
-              sh """
-terraform workspace select jenkins-lab-2
-if [[ \$? -ne 0 ]]; then
-  terraform workspace new jenkins-lab-2
-fi
-"""
           }
       }
       stage("plan") {

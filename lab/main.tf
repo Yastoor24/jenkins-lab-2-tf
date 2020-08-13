@@ -26,6 +26,20 @@ module "tags_bastion" {
   }
 }
 
+module "tags_api" {
+  source      = "git::https://github.com/cloudposse/terraform-null-label.git"
+  namespace   = var.name
+  environment = "dev"
+  name        = "api-devops-bootcamp"
+  delimiter   = "_"
+
+  tags = {
+    owner = var.name
+    type  = "api"
+  }
+}
+
+
 module "tags_webserver" {
   source      = "git::https://github.com/cloudposse/terraform-null-label.git"
   namespace   = var.name
@@ -55,8 +69,8 @@ resource "aws_vpc" "lab" {
   enable_dns_hostnames = true
 }
 
-resource "aws_route53_zone" "bryan_dobc" {
-  name = "bryan.dobc"
+resource "aws_route53_zone" "yaser_dobc" {
+  name = "yaser.dobc"
   tags = module.tags_network.tags
 
   vpc {
@@ -155,7 +169,7 @@ resource "aws_key_pair" "lab_keypair" {
 }
 
 resource "aws_route53_record" "webserver" {
-  zone_id = aws_route53_zone.bryan_dobc.id
+  zone_id = aws_route53_zone.yaser_dobc.id
   name    = "webserver"
   type    = "A"
   ttl     = 300
@@ -172,6 +186,11 @@ resource "aws_instance" "webserver" {
   associate_public_ip_address = true
   tags                        = module.tags_webserver.tags
   depends_on                  = [aws_instance.api]
+  user_data = <<-EOF
+          #!/bin/bash
+          echo " ${aws_instance.api.0.public_ip}" > /home/ubuntu/public-ip.txt
+          cat /home/ubuntu/public-ip.txt
+          EOF
 }
 
 resource "aws_instance" "api" {
